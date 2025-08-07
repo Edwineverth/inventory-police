@@ -5,10 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.5" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.5">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <ProjectReference Include="../InventoryPolice.Application/InventoryPolice.Application.csproj" />
+    <ProjectReference Include="../InventoryPolice.Infrastructure/InventoryPolice.Infrastructure.csproj" />
   </ItemGroup>
 </Project>
