@@ -1,63 +1,54 @@
-using InventoryPolice.Api.Data;
-using InventoryPolice.Api.Models;
+using InventoryPolice.Application.Interfaces;
+using InventoryPolice.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-namespace InventoryPolice.Api.Controllers
+namespace InventoryPolice.Api.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class OfficersController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class OfficersController : ControllerBase
+    private readonly IOfficerService _service;
+
+    public OfficersController(IOfficerService service)
     {
-        private readonly ApplicationDbContext _context;
-        public OfficersController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+        _service = service;
+    }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Officer>>> GetOfficers()
-        {
-            return await _context.Officers
-                .Include(o => o.Devices)
-                .ToListAsync();
-        }
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<Officer>>> GetOfficers()
+    {
+        var officers = await _service.GetOfficersAsync();
+        return Ok(officers);
+    }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Officer>> GetOfficer(int id)
-        {
-            var officer = await _context.Officers
-                .Include(o => o.Devices)
-                .FirstOrDefaultAsync(o => o.Id == id);
-            if (officer == null) return NotFound();
-            return officer;
-        }
+    [HttpGet("{id}")]
+    public async Task<ActionResult<Officer>> GetOfficer(int id)
+    {
+        var officer = await _service.GetOfficerAsync(id);
+        if (officer == null) return NotFound();
+        return officer;
+    }
 
-        [HttpPost]
-        public async Task<ActionResult<Officer>> PostOfficer(Officer officer)
-        {
-            _context.Officers.Add(officer);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetOfficer), new { id = officer.Id }, officer);
-        }
+    [HttpPost]
+    public async Task<ActionResult<Officer>> PostOfficer(Officer officer)
+    {
+        await _service.CreateOfficerAsync(officer);
+        return CreatedAtAction(nameof(GetOfficer), new { id = officer.Id }, officer);
+    }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutOfficer(int id, Officer officer)
-        {
-            if (id != officer.Id) return BadRequest();
-            _context.Entry(officer).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
+    [HttpPut("{id}")]
+    public async Task<IActionResult> PutOfficer(int id, Officer officer)
+    {
+        if (id != officer.Id) return BadRequest();
+        await _service.UpdateOfficerAsync(officer);
+        return NoContent();
+    }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteOfficer(int id)
-        {
-            var officer = await _context.Officers.FindAsync(id);
-            if (officer == null) return NotFound();
-            _context.Officers.Remove(officer);
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteOfficer(int id)
+    {
+        await _service.DeleteOfficerAsync(id);
+        return NoContent();
     }
 }
